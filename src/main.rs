@@ -27,11 +27,11 @@ fn encode(_message:&str) -> Vec<Vec<Color>>{
 /**Initializes Image-Pallet in give dimensions using Color.BLACK as default.
     Boundaries are inclusive.
 **/
-fn initPallet(width:i32, height:i32) -> Vec<Vec<Color>>{
+fn init_pallet(width:i32, height:i32) -> Vec<Vec<Color>>{
     let mut pallet : Vec<Vec<Color>> = Vec::new();
-    for i  in 1..=height {
+    for _  in 1..=height {
         let mut row : Vec<Color> = Vec::new();
-        for j in 1..=width {
+        for _ in 1..=width {
             row.push(Color::BLACK);
         }
         pallet.push(row);
@@ -41,7 +41,7 @@ fn initPallet(width:i32, height:i32) -> Vec<Vec<Color>>{
 }
 
 //Code Finder-Pattern
-fn createFinderPattern(pallet: &mut Vec<Vec<Color>>) -> (){
+fn create_finder_pattern(pallet: &mut Vec<Vec<Color>>) -> (){
 
     let max_height = pallet.len();
     let max_width = pallet[1].len();
