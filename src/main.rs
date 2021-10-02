@@ -12,7 +12,6 @@ fn main() -> (){
             println!();
         });
     }
-
 }
 
 //25x25 image support
@@ -146,3 +145,5 @@ fn createFinderPattern(pallet: &mut Vec<Vec<Color>>) -> (){
     pallet[max_height - 2][2] = Color::YELLOW;
     pallet[max_height - 2][3] = Color::YELLOW;
 }
+
+
