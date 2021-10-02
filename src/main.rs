@@ -29,7 +29,7 @@ fn encode(_message:&str) -> Vec<Vec<Color>>{
 **/
 fn init_pallet(width:i32, height:i32) -> Vec<Vec<Color>>{
     let mut pallet : Vec<Vec<Color>> = Vec::new();
-    for _  in 1..=height {
+    for _ in 1..=height {
         let mut row : Vec<Color> = Vec::new();
         for _ in 1..=width {
             row.push(Color::BLACK);
