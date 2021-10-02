@@ -18,8 +18,8 @@ fn main() -> (){
 //25x25 image support
 //no options supported yet
 fn encode(_message:&str) -> Vec<Vec<Color>>{
-    let mut jab_code_primary : Vec<Vec<Color>> = initPallet(25,25);
-    createFinderPattern(&mut jab_code_primary);
+    let mut jab_code_primary : Vec<Vec<Color>> = init_pallet(25,25);
+    create_finder_pattern(&mut jab_code_primary);
 
     return jab_code_primary;
 }
