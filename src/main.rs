@@ -2,11 +2,18 @@ mod utils;
 use utils::config;
 use utils::enums::colors::Color;
 use utils::image_maker;
+use utils::structs::code;
+
 
 fn main() -> (){
-    let jab_code : Vec<Vec<Color>> = encode("Test");
+    let jab_code: code::Code = code::Code {
+        height: config::CODE_HEIGHT,
+        width: config::CODE_WIDTH,
+        data: encode("Test")
+    };
+
     if config::PRINT_CODE{
-        jab_code.iter().for_each(|vec|{
+        jab_code.data.iter().for_each(|vec|{
             vec.iter().for_each(|&pixel|{
                 print!("{}  ",pixel as u8);
             });
@@ -14,7 +21,7 @@ fn main() -> (){
         });
     }
     if config::RENDER_TO_PNG {
-        image_maker::render_to_png(jab_code);
+        image_maker::render_to_png(jab_code.data);
     }
 }
 
@@ -22,7 +29,14 @@ fn main() -> (){
 //no options supported yet
 fn encode(_message:&str) -> Vec<Vec<Color>>{
     let mut jab_code_primary : Vec<Vec<Color>> = init_pallet(config::CODE_WIDTH,config::CODE_HEIGHT);
-    create_finder_pattern(&mut jab_code_primary);
+
+    let maxLength: u16 = (jab_code_primary.len()-4) as u16;
+
+    create_finder_pattern(3, 3, Color::BLUE, Color::YELLOW, false, &mut jab_code_primary);
+    create_finder_pattern(maxLength, 3, Color::GREEN, Color::MAGENTA, false, &mut jab_code_primary);
+    create_finder_pattern(3, maxLength, Color::YELLOW, Color::BLUE, true, &mut jab_code_primary);
+    create_finder_pattern(maxLength, maxLength, Color::MAGENTA, Color::GREEN, true, &mut jab_code_primary);
+
 
     return jab_code_primary;
 }
@@ -44,110 +58,42 @@ fn init_pallet(width:u32, height:u32) -> Vec<Vec<Color>>{
 }
 
 //Code Finder-Pattern
-fn create_finder_pattern(pallet: &mut Vec<Vec<Color>>) -> (){
+fn create_finder_pattern(center_x: u16, center_y: u16, primary: Color, secondary: Color, invert: bool, pallet: &mut Vec<Vec<Color>>) -> (){
 
-    let max_height = pallet.len();
-    let max_width = pallet[1].len();
+    //Define the finder pattern trough a 2D vector
+    let mut pattern = vec![
+        vec![1, 1, 1, 255, 255],
+        vec![1, 2, 2, 255, 255],
+        vec![1, 2, 1, 2, 1],
+        vec![255, 255, 2, 2, 1],
+        vec![255, 255, 1, 1, 1],
+    ];
 
-    //Finder-Pattern UL
-    pallet[1][1] = Color::BLUE;
-    pallet[1][2] = Color::BLUE;
-    pallet[1][3] = Color::BLUE;
+    //invert pattern if we need the lower patterns
+    if invert{
+        pattern.reverse();
+    }
 
-    pallet[2][1] = Color::BLUE;
-    pallet[2][2] = Color::YELLOW;
-    pallet[2][3] = Color::YELLOW;
+    //Define offset of patterns
+    let mut x: usize = (center_x - 2).into();
+    let mut y: usize = (center_y - 2).into();
 
-    pallet[3][1] = Color::BLUE;
-    pallet[3][2] = Color::YELLOW;
+    for i in 0..=pattern.len()-1 {
+        x = (center_x - 2).into();
+        for j in 0..=pattern[i].len()-1 {
+            //Depent coloring of module trough a number
+            if pattern[i][j] == 1{
+                pallet[x][y] = primary;
+            }else if pattern[i][j] == 2 {
+                pallet[x][y] = secondary;
+            }
 
-    pallet[3][3] = Color::BLUE;
+            x = x + 1;
+        }
+        y = y + 1;
+    }
 
-    pallet[3][4] = Color::YELLOW;
-    pallet[3][5] = Color::BLUE;
 
-    pallet[4][3] = Color::YELLOW;
-    pallet[4][4] = Color::YELLOW;
-    pallet[4][5] = Color::BLUE;
-
-    pallet[5][3] = Color::BLUE;
-    pallet[5][4] = Color::BLUE;
-    pallet[5][5] = Color::BLUE;
-
-    //Finder-Pattern UR
-    pallet[1][max_width - 6] = Color::GREEN;
-    pallet[1][max_width - 5] = Color::GREEN;
-    pallet[1][max_width - 4] = Color::GREEN;
-
-    pallet[2][max_width - 6] = Color::GREEN;
-    pallet[2][max_width - 5] = Color::MAGENTA;
-    pallet[2][max_width - 4] = Color::MAGENTA;
-
-    pallet[3][max_width - 6] = Color::GREEN;
-    pallet[3][max_width - 5] = Color::MAGENTA;
-
-    pallet[3][max_width - 4] = Color::GREEN;
-
-    pallet[3][max_width - 3] = Color::MAGENTA;
-    pallet[3][max_width - 2] = Color::GREEN;
-
-    pallet[4][max_width - 4] = Color::MAGENTA;
-    pallet[4][max_width - 3] = Color::MAGENTA;
-    pallet[4][max_width - 2] = Color::GREEN;
-
-    pallet[5][max_width - 4] = Color::GREEN;
-    pallet[5][max_width - 3] = Color::GREEN;
-    pallet[5][max_width - 2] = Color::GREEN;
-
-    //Finder-Pattern LR
-    pallet[max_height - 6][max_width - 4] = Color::MAGENTA;
-    pallet[max_height - 6][max_width - 3] = Color::MAGENTA;
-    pallet[max_height - 6][max_width - 2] = Color::MAGENTA;
-
-    pallet[max_height - 5][max_width - 4] = Color::GREEN;
-    pallet[max_height - 5][max_width - 3] = Color::GREEN;
-    pallet[max_height - 5][max_width - 2] = Color::MAGENTA;
-
-    pallet[max_height - 4][max_width - 6] = Color::MAGENTA;
-    pallet[max_height - 4][max_width - 5] = Color::GREEN;
-
-    pallet[max_height - 4][max_width - 4] = Color::MAGENTA;
-
-    pallet[max_height - 4][max_width - 3] = Color::GREEN;
-    pallet[max_height - 4][max_width - 2] = Color::MAGENTA;
-
-    pallet[max_height - 3][max_width - 6] = Color::MAGENTA;
-    pallet[max_height - 3][max_width - 5] = Color::GREEN;
-    pallet[max_height - 3][max_width - 4] = Color::GREEN;
-
-    pallet[max_height - 2][max_width - 6] = Color::MAGENTA;
-    pallet[max_height - 2][max_width - 5] = Color::MAGENTA;
-    pallet[max_height - 2][max_width - 4] = Color::MAGENTA;
-
-    //Finder-Pattern LL
-    pallet[max_height - 6][3] = Color::YELLOW;
-    pallet[max_height - 6][4] = Color::YELLOW;
-    pallet[max_height - 6][5] = Color::YELLOW;
-
-    pallet[max_height - 5][3] = Color::BLUE;
-    pallet[max_height - 5][4] = Color::BLUE;
-    pallet[max_height - 5][5] = Color::YELLOW;
-
-    pallet[max_height - 4][1] = Color::YELLOW;
-    pallet[max_height - 4][2] = Color::BLUE;
-
-    pallet[max_height - 4][3] = Color::YELLOW;
-
-    pallet[max_height - 4][4] = Color::BLUE;
-    pallet[max_height - 4][5] = Color::YELLOW;
-
-    pallet[max_height - 3][1] = Color::YELLOW;
-    pallet[max_height - 3][2] = Color::BLUE;
-    pallet[max_height - 3][3] = Color::BLUE;
-
-    pallet[max_height - 2][1] = Color::YELLOW;
-    pallet[max_height - 2][2] = Color::YELLOW;
-    pallet[max_height - 2][3] = Color::YELLOW;
 }
 
 
